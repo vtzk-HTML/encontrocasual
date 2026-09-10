@@ -15,11 +15,16 @@ package.json         → dependência do banco (Vercel KV)
    New Project → Deploy).
 
 2. **Crie o banco de dados na Vercel:**
-   - No painel do projeto, vá em **Storage** → **Create Database** → escolha
-     **KV** (ou "Upstash for Redis", que é o que a Vercel usa por baixo).
-   - Depois de criar, clique em **Connect Project** e conecte ao seu projeto.
-   - Isso já injeta automaticamente as variáveis de ambiente que o
-     `@vercel/kv` precisa (`KV_REST_API_URL`, `KV_REST_API_TOKEN` etc.) —
+   - No painel do projeto, vá em **Storage**.
+   - A Vercel não tem mais o antigo "KV" nativo — agora as bases de dados
+     ficam no **Marketplace**. Clique em **Create Database** (ou
+     **Browse Marketplace**) e escolha **Upstash** → **Redis**
+     (é a opção equivalente, gratuita no plano free).
+   - Depois de criado, clique em **Connect Project** e conecte ao seu
+     projeto. Isso injeta automaticamente as variáveis de ambiente que o
+     código precisa (`KV_REST_API_URL`/`KV_REST_API_TOKEN` ou
+     `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`, dependendo do
+     nome que a integração usar — o código já lida com os dois casos) —
      não precisa copiar nada manualmente.
 
 3. **Defina a senha da área de respostas:**

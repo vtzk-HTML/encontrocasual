@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encontro no Refeitório</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gravitas+One&family=Faustina:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    width: 100%;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    font-family: 'Faustina', Georgia, serif;
+    overflow-x: hidden;
+    position: relative;
+    padding: 16px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px 22px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .card h1 {
+    font-family: 'Gravitas One', 'Faustina', Georgia, serif;
+    font-size: 1.5em;
+    line-height: 1.4;
+    color: #d9480f;
+    margin-bottom: 18px;
+    letter-spacing: 0.8px;
+    word-spacing: 2px;
+  }
+
+  .card p {
+    color: #444;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-line;
+    margin-bottom: 22px;
+    font-size: 0.98em;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: relative;
+    min-height: 56px;
+  }
+
+  button {
+    font-family: 'Faustina', Georgia, serif;
+    padding: 13px 24px;
+    font-size: 1em;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, top 0.25s ease, left 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+
+  .sim {
+    background: #40c057;
+    color: white;
+    box-shadow: 0 6px 15px rgba(64,192,87,0.4);
+  }
+  .sim:hover, .sim:active {
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(64,192,87,0.5);
+  }
+
+  .nao {
+    background: #fa5252;
+    color: white;
+    box-shadow: 0 6px 15px rgba(250,82,82,0.4);
+    position: static;
+  }
+
+  .nao.fugindo {
+    position: fixed;
+    z-index: 999;
+  }
+
+  #resultado {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #d9480f;
+    font-size: 1.05em;
+    min-height: 24px;
+  }
+
+  @media (max-width: 420px) {
+    .card h1 { font-size: 1.3em; }
+    .card p { font-size: 0.92em; }
+    button { padding: 12px 18px; font-size: 0.92em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Encontro no Refeitório 🍽️</h1>
+  <p>Oi Sarah. 👀
+Eu pensei em uma forma diferente de te chamar pra conversar.
+A real é que eu queria te conhecer melhor.
+Sem muita enrolação, sem inventar desculpa.
+
+Então fica aqui um convite:
+Que tal a gente se encontrar no refeitório da escola? Sem data marcada, sem compromisso — pode ser todo dia que der certo. 🍽️
+No intervalo, só pra conversar um pouco, trocar ideia e ver no que dá.
+
+Não prometo uma conversa perfeita...
+mas prometo que minha intenção é sincera. :)
+
+Então, o que acha?</p>
+
+  <div class="buttons">
+    <button class="sim" onclick="dizerSim()">Sim, vamos conversar</button>
+    <button class="nao" id="botaoNao">Não</button>
+  </div>
+
+  <div id="resultado"></div>
+</div>
+
+<script>
+  const botaoNao = document.getElementById('botaoNao');
+  const resultado = document.getElementById('resultado');
+
+  function posicionarAleatorio(btn) {
+    const largura = window.innerWidth - btn.offsetWidth - 16;
+    const altura = window.innerHeight - btn.offsetHeight - 16;
+    const x = Math.max(8, Math.random() * largura);
+    const y = Math.max(8, Math.random() * altura);
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
+  }
+
+  // Envia a resposta pro banco de dados (Vercel KV) via API
+  function registrarResposta(resposta) {
+    fetch('/api/responder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resposta })
+    }).catch(() => {
+      // Falha silenciosa: mesmo se o registro não funcionar,
+      // a experiência na tela continua normalmente.
+    });
+  }
+
+  // Ao clicar/tocar no "Não": ele passa a fugir e cria um clone
+  function fugirEClonar(e) {
+    if (e) e.preventDefault();
+    if (!botaoNao.classList.contains('fugindo')) {
+      botaoNao.classList.add('fugindo');
+      registrarResposta('nao'); // registra só a primeira tentativa de recusa
+    }
+    posicionarAleatorio(botaoNao);
+    criarClone();
+  }
+
+  botaoNao.addEventListener('click', fugirEClonar);
+  botaoNao.addEventListener('touchstart', fugirEClonar, { passive: false });
+
+  function criarClone() {
+    const clone = botaoNao.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.classList.add('fugindo');
+    document.body.appendChild(clone);
+    posicionarAleatorio(clone);
+
+    clone.addEventListener('click', (e) => {
+      e.preventDefault();
+      posicionarAleatorio(clone);
+      criarClone();
+    });
+    clone.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      posicionarAleatorio(clone);
+      criarClone();
+    }, { passive: false });
+
+    // Some depois de um tempinho pra não lotar a tela
+    setTimeout(() => {
+      clone.style.transition = 'opacity 0.6s';
+      clone.style.opacity = '0';
+      setTimeout(() => clone.remove(), 600);
+    }, 2500);
+  }
+
+  function dizerSim() {
+    resultado.textContent = '🎉 Combinado! Te espero no refeitório! 🍽️💬';
+    document.querySelectorAll('.nao').forEach(b => b.style.display = 'none');
+    registrarResposta('sim');
+  }
+</script>
+
+</body>
+</html>
